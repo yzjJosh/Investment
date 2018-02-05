@@ -10,13 +10,17 @@
 from strategies import decision
 from strategies import buy_and_hold
 from strategies import buy_and_hold_with_threshold
+from strategies import buy_and_hold_with_shrinking_threshold
 from strategies import buy_conservatively_and_hold_with_threshold
+from strategies import buy_conservatively_and_hold_with_shrinking_threshold
 import matplotlib.pyplot as plt
 
 #Strategy strings.
 STRATEGY_BUY_AND_HOLD = "buy_and_hold"
 STRATEGY_BUY_AND_HOLD_WITH_THRESHOLD = "buy_and_hold_with_threshold"
+STRATEGY_BUY_AND_HOLD_WITH_SHRINKING_THRESHOLD = "buy_and_hold_with_shrinking_threshold"
 STRATEGY_BUY_CONSERVATIVELY_WITH_THRESHOLD = "buy_conservatively_and_hold_with_threshold"
+STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD = "buy_conservatively_and_hold_with_shrinking_threshold"
 
 #String key of simulation results
 KEY_DATE = "DATE"
@@ -40,6 +44,10 @@ def initialize(strategy, init_cash):
         buy_and_hold_with_threshold.initialize(init_cash)
     elif strategy == STRATEGY_BUY_CONSERVATIVELY_WITH_THRESHOLD:
         buy_conservatively_and_hold_with_threshold.initialize(init_cash)
+    elif strategy == STRATEGY_BUY_AND_HOLD_WITH_SHRINKING_THRESHOLD:
+        buy_and_hold_with_shrinking_threshold.initialize(init_cash)
+    elif strategy == STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD:
+        buy_conservatively_and_hold_with_shrinking_threshold.initialize(init_cash)
     else:
         raise Exception("Unknown strategy " + strategy)
 
@@ -51,6 +59,10 @@ def on_stock_price_change(strategy, price):
         return buy_and_hold_with_threshold.on_stock_price_change(price)
     elif strategy == STRATEGY_BUY_CONSERVATIVELY_WITH_THRESHOLD:
         return buy_conservatively_and_hold_with_threshold.on_stock_price_change(price)
+    elif strategy == STRATEGY_BUY_AND_HOLD_WITH_SHRINKING_THRESHOLD:
+        return buy_and_hold_with_shrinking_threshold.on_stock_price_change(price)
+    elif strategy == STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD:
+        return buy_conservatively_and_hold_with_shrinking_threshold.on_stock_price_change(price)
     else:
         raise Exception("Unknown strategy " + strategy)
 
