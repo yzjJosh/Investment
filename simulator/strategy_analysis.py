@@ -16,10 +16,10 @@ class Node:
 
 #A data class that represents statistic data of a certain index
 class Stat:
-    def __init__(self, max_value, min_value, ava, median, data_size):
+    def __init__(self, max_value, min_value, ave, median, data_size):
         self.max = max_value
         self.min = min_value
-        self.ava = ava
+        self.ave = ave
         self.median = median
         self.size = data_size
 
@@ -54,23 +54,23 @@ def analyze_fixed_length_investment(price_data, investment_length, strategy):
         sims.append(sim)
     gain_max = Node(max(gain), sims[search(gain, max(gain))])
     gain_min = Node(min(gain), sims[search(gain, min(gain))])
-    gain_ava = Node(sum(gain)/len(gain))
+    gain_ave = Node(sum(gain)/len(gain))
     gain_median = Node(statistics.median(gain), sims[search(gain, statistics.median(gain))])
-    gain_stat = Stat(gain_max, gain_min, gain_ava, gain_median, len(gain))
+    gain_stat = Stat(gain_max, gain_min, gain_ave, gain_median, len(gain))
     
     positive_gain = filter(lambda x: x > 0, gain)
     positive_gain_max = Node(max(positive_gain), sims[search(gain, max(positive_gain))])
     positive_gain_min = Node(min(positive_gain), sims[search(gain, min(positive_gain))])
-    positive_gain_ava = Node(sum(positive_gain)/len(positive_gain))
+    positive_gain_ave = Node(sum(positive_gain)/len(positive_gain))
     positive_gain_median = Node(statistics.median(positive_gain), sims[search(gain, statistics.median(positive_gain))])
-    positive_gain_stat = Stat(positive_gain_max, positive_gain_min, positive_gain_ava, positive_gain_median, len(positive_gain))
+    positive_gain_stat = Stat(positive_gain_max, positive_gain_min, positive_gain_ave, positive_gain_median, len(positive_gain))
 
     negative_gain = filter(lambda x: x < 0, gain)
     negative_gain_max = Node(max(negative_gain), sims[search(gain, max(negative_gain))])
     negative_gain_min = Node(min(negative_gain), sims[search(gain, min(negative_gain))])
-    negative_gain_ava = Node(sum(negative_gain)/len(negative_gain))
+    negative_gain_ave = Node(sum(negative_gain)/len(negative_gain))
     negative_gain_median = Node(statistics.median(negative_gain), sims[search(gain, statistics.median(negative_gain))])
-    negative_gain_stat = Stat(negative_gain_max, negative_gain_min, negative_gain_ava, negative_gain_median, len(negative_gain))
+    negative_gain_stat = Stat(negative_gain_max, negative_gain_min, negative_gain_ave, negative_gain_median, len(negative_gain))
 
     return Analysis(strategy, len(sims), gain_stat, positive_gain_stat, negative_gain_stat)
 
@@ -78,15 +78,15 @@ def show_analysis_result(analysis):
     print "Number of simulations ran:", analysis.sim_times
     print "Maximum gain:", analysis.gain_stat.max.value * 100, "%"
     print "Minimum gain:", analysis.gain_stat.min.value * 100, "%"
-    print "Average gain:", analysis.gain_stat.ava.value * 100, "%"
+    print "Average gain:", analysis.gain_stat.ave.value * 100, "%"
     print "Median gain:", analysis.gain_stat.median.value * 100, "%"
     print "--------------------------------------------------------"
     print "Positive gain percentage:", float(analysis.positive_gain_stat.size) / analysis.gain_stat.size * 100, "%"
-    print "Average positive gain:", analysis.positive_gain_stat.ava.value * 100, "%"
+    print "Average positive gain:", analysis.positive_gain_stat.ave.value * 100, "%"
     print "Median positive gain:", analysis.positive_gain_stat.median.value * 100, "%"
     print "--------------------------------------------------------"
     print "Negative gain percentage:", float(analysis.negative_gain_stat.size) / analysis.gain_stat.size * 100, "%"
-    print "Average negative gain:", analysis.negative_gain_stat.ava.value * 100, "%"
+    print "Average negative gain:", analysis.negative_gain_stat.ave.value * 100, "%"
     print "Median negative gain:", analysis.negative_gain_stat.median.value * 100, "%"
     print "--------------------------------------------------------"
 
