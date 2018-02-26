@@ -11,5 +11,10 @@ def add(data):
 def moving_average(length):
     global series
     length = min(length, len(series))
-    return sum(series[len(prices) - length :]) / length
+    return sum(series[len(series) - length :]) / length
+
+#Clear data points
+def reset():
+    global series
+    series = []
 

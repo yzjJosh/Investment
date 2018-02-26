@@ -93,11 +93,8 @@ def show_analysis_result(analysis):
     command = raw_input("Do you want to review the line-charts? (Type \"Y\" to confirm) ")
     if command == "Y":
         print "Showing line-charts of max, min, and median profit investments ..."
-        plt.figure()
         simulate.plot_investment_line_chart(price_data, analysis.strategy, analysis.gain_stat.max.simulation)
-        plt.figure()
         simulate.plot_investment_line_chart(price_data, analysis.strategy, analysis.gain_stat.min.simulation)
-        plt.figure()
         simulate.plot_investment_line_chart(price_data, analysis.strategy, analysis.gain_stat.median.simulation)
         plt.show()
     else:

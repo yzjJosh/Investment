@@ -13,6 +13,8 @@ from strategies import buy_and_hold_with_threshold
 from strategies import buy_and_hold_with_shrinking_threshold
 from strategies import buy_conservatively_and_hold_with_threshold
 from strategies import buy_conservatively_and_hold_with_shrinking_threshold
+from strategies import sma
+from strategies import sma_with_threshold
 import matplotlib.pyplot as plt
 
 #Strategy strings.
@@ -21,6 +23,8 @@ STRATEGY_BUY_AND_HOLD_WITH_THRESHOLD = "buy_and_hold_with_threshold"
 STRATEGY_BUY_AND_HOLD_WITH_SHRINKING_THRESHOLD = "buy_and_hold_with_shrinking_threshold"
 STRATEGY_BUY_CONSERVATIVELY_WITH_THRESHOLD = "buy_conservatively_and_hold_with_threshold"
 STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD = "buy_conservatively_and_hold_with_shrinking_threshold"
+STRATEGY_SMA = "sma"
+STRATEGY_SMA_WITH_THRESHOLD = "sma_with_threshold"
 
 #String key of simulation results
 KEY_DATE = "DATE"
@@ -48,6 +52,10 @@ def initialize(strategy, init_cash):
         buy_and_hold_with_shrinking_threshold.initialize(init_cash)
     elif strategy == STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD:
         buy_conservatively_and_hold_with_shrinking_threshold.initialize(init_cash)
+    elif strategy == STRATEGY_SMA:
+        sma.initialize(init_cash)
+    elif strategy == STRATEGY_SMA_WITH_THRESHOLD:
+        sma_with_threshold.initialize(init_cash)
     else:
         raise Exception("Unknown strategy " + strategy)
 
@@ -63,6 +71,10 @@ def on_stock_price_change(strategy, price):
         return buy_and_hold_with_shrinking_threshold.on_stock_price_change(price)
     elif strategy == STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD:
         return buy_conservatively_and_hold_with_shrinking_threshold.on_stock_price_change(price)
+    elif strategy == STRATEGY_SMA:
+        return sma.on_stock_price_change(price)
+    elif strategy == STRATEGY_SMA_WITH_THRESHOLD:
+        return sma_with_threshold.on_stock_price_change(price)
     else:
         raise Exception("Unknown strategy " + strategy)
 
@@ -123,15 +135,20 @@ def plot_investment_line_chart(price_data, strategy, sim):
     normalized_price_line = map(lambda p: p/max(price_line), price_line)
     value_line = map(lambda inv: (inv[KEY_BEGIN_VALUE] + inv[KEY_END_VALUE])/2, sim)
     normalized_value_line = map(lambda v: v/max(value_line), value_line)
+    share_line = map(lambda inv: inv[KEY_END_SHARE], sim)
+    normalized_share_line = map(lambda s: float(s)/max(share_line), share_line)
     time_line = range(begin_time, begin_time + simulation_length)
-    plt.plot(time_line, normalized_price_line, label="Market Value")
-    plt.plot(time_line, normalized_value_line, label="Assets Value")
-    plt.legend()
-    plt.xlabel('date index')
-    plt.ylabel('normalized value')
-    plt.title('Simulation Result of Investment Strategy ' + strategy)
-    plt.grid(True)
-
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+    ax1.plot(time_line, normalized_price_line, label="Market Value")
+    ax1.plot(time_line, normalized_value_line, label="Assets Value")
+    ax1.legend()
+    ax1.grid(True)
+    ax1.set_ylabel('normalized value')
+    ax1.set_title('Simulation Result of Investment Strategy ' + strategy)
+    ax2.plot(time_line, normalized_share_line, label="Shares Held")
+    ax2.grid(True)
+    ax2.set_ylabel('normalized # of shares held')
+    ax2.set_xlabel('date index') 
 
 if __name__ == "__main__":
     import sys
