@@ -59,35 +59,41 @@ def analyze_fixed_length_investment(price_data, investment_length, strategy):
     gain_stat = Stat(gain_max, gain_min, gain_ave, gain_median, len(gain))
     
     positive_gain = filter(lambda x: x > 0, gain)
-    positive_gain_max = Node(max(positive_gain), sims[search(gain, max(positive_gain))])
-    positive_gain_min = Node(min(positive_gain), sims[search(gain, min(positive_gain))])
-    positive_gain_ave = Node(sum(positive_gain)/len(positive_gain))
-    positive_gain_median = Node(statistics.median(positive_gain), sims[search(gain, statistics.median(positive_gain))])
-    positive_gain_stat = Stat(positive_gain_max, positive_gain_min, positive_gain_ave, positive_gain_median, len(positive_gain))
+    if len(positive_gain) > 0:
+        positive_gain_max = Node(max(positive_gain), sims[search(gain, max(positive_gain))])
+        positive_gain_min = Node(min(positive_gain), sims[search(gain, min(positive_gain))])
+        positive_gain_ave = Node(sum(positive_gain)/len(positive_gain))
+        positive_gain_median = Node(statistics.median(positive_gain), sims[search(gain, statistics.median(positive_gain))])
+        positive_gain_stat = Stat(positive_gain_max, positive_gain_min, positive_gain_ave, positive_gain_median, len(positive_gain))
+    else:
+        positive_gain_stat = Stat(None, None, None, None, len(positive_gain))
 
     negative_gain = filter(lambda x: x < 0, gain)
-    negative_gain_max = Node(max(negative_gain), sims[search(gain, max(negative_gain))])
-    negative_gain_min = Node(min(negative_gain), sims[search(gain, min(negative_gain))])
-    negative_gain_ave = Node(sum(negative_gain)/len(negative_gain))
-    negative_gain_median = Node(statistics.median(negative_gain), sims[search(gain, statistics.median(negative_gain))])
-    negative_gain_stat = Stat(negative_gain_max, negative_gain_min, negative_gain_ave, negative_gain_median, len(negative_gain))
+    if len(negative_gain) > 0:
+        negative_gain_max = Node(max(negative_gain), sims[search(gain, max(negative_gain))])
+        negative_gain_min = Node(min(negative_gain), sims[search(gain, min(negative_gain))])
+        negative_gain_ave = Node(sum(negative_gain)/len(negative_gain))
+        negative_gain_median = Node(statistics.median(negative_gain), sims[search(gain, statistics.median(negative_gain))])
+        negative_gain_stat = Stat(negative_gain_max, negative_gain_min, negative_gain_ave, negative_gain_median, len(negative_gain))
+    else:
+        negative_gain_stat = Stat(None, None, None, None, len(negative_gain))
 
     return Analysis(strategy, len(sims), gain_stat, positive_gain_stat, negative_gain_stat)
 
 def show_analysis_result(analysis):
     print "Number of simulations ran:", analysis.sim_times
-    print "Maximum gain:", analysis.gain_stat.max.value * 100, "%"
-    print "Minimum gain:", analysis.gain_stat.min.value * 100, "%"
-    print "Average gain:", analysis.gain_stat.ave.value * 100, "%"
-    print "Median gain:", analysis.gain_stat.median.value * 100, "%"
+    print "Maximum gain:", get_value(analysis.gain_stat.max) * 100, "%"
+    print "Minimum gain:", get_value(analysis.gain_stat.min) * 100, "%"
+    print "Average gain:", get_value(analysis.gain_stat.ave) * 100, "%"
+    print "Median gain:", get_value(analysis.gain_stat.median) * 100, "%"
     print "--------------------------------------------------------"
     print "Positive gain percentage:", float(analysis.positive_gain_stat.size) / analysis.gain_stat.size * 100, "%"
-    print "Average positive gain:", analysis.positive_gain_stat.ave.value * 100, "%"
-    print "Median positive gain:", analysis.positive_gain_stat.median.value * 100, "%"
+    print "Average positive gain:", get_value(analysis.positive_gain_stat.ave) * 100, "%"
+    print "Median positive gain:", get_value(analysis.positive_gain_stat.median) * 100, "%"
     print "--------------------------------------------------------"
     print "Negative gain percentage:", float(analysis.negative_gain_stat.size) / analysis.gain_stat.size * 100, "%"
-    print "Average negative gain:", analysis.negative_gain_stat.ave.value * 100, "%"
-    print "Median negative gain:", analysis.negative_gain_stat.median.value * 100, "%"
+    print "Average negative gain:", get_value(analysis.negative_gain_stat.ave) * 100, "%"
+    print "Median negative gain:", get_value(analysis.negative_gain_stat.median) * 100, "%"
     print "--------------------------------------------------------"
 
     command = raw_input("Do you want to review the line-charts? (Type \"Y\" to confirm) ")
@@ -99,6 +105,12 @@ def show_analysis_result(analysis):
         plt.show()
     else:
         print "Skip the line-charts."
+
+def get_value(node):
+    if node == None:
+        return 0
+    else:
+        return node.value
 
 if __name__ == "__main__":
     import sys

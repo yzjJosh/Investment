@@ -85,11 +85,11 @@ def on_stock_price_change(price):
         long_base_price = price
         sell_long_in_week = True
     if buy > 0:
-        return (decision.BUY, abs(buy))
+        return [(decision.BUY, abs(buy), price)]
     elif buy < 0:
-        return (decision.SELL, abs(buy))
+        return [(decision.SELL, abs(buy), price)]
     else:
-        return (decision.HOLD, 0)
+        return [(decision.HOLD, 0, price)]
 
 # Spend half of available short cash to buy. Return shares bought.
 def buy_short(price):

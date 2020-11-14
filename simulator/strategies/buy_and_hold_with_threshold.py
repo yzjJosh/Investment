@@ -23,7 +23,7 @@ def on_stock_price_change(price):
         shares = int(cash / price)
         cash = cash - shares * price
         base_price = price
-        return (decision.BUY, shares)
+        return [(decision.BUY, shares, price)]
     else:
         price_percentage = price / base_price * 100
         if shares > 0 and (price_percentage >= 100 + MAX_GAIN_PRECENTAGE or price_percentage <= 100 - MAX_LOSS_PERCENTAGE):
@@ -33,9 +33,9 @@ def on_stock_price_change(price):
             cash = cash + shares_to_sell * price
             shares = shares - shares_to_sell
             base_price = price
-            return (decision.SELL, shares_to_sell)
+            return [(decision.SELL, shares_to_sell, price)]
         else:
-            return (decision.HOLD, 0)
+            return [(decision.HOLD, 0, price)]
 
 
     

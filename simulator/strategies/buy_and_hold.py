@@ -10,9 +10,10 @@ def initialize(init_cash):
 def on_stock_price_change(price):
     global cash
     if cash > price:
-        dec = (decision.BUY, int(cash / price))
-        cash = cash - dec[1] * price
+        amount = int(cash / price)
+        dec = [(decision.BUY, amount, price)]
+        cash = cash - amount * price
         return dec
     else:
-        return (decision.HOLD, 0)
+        return [(decision.HOLD, 0, price)]
 

@@ -16,6 +16,7 @@ from strategies import buy_conservatively_and_hold_with_threshold
 from strategies import buy_conservatively_and_hold_with_shrinking_threshold
 from strategies import sma
 from strategies import sma_with_threshold
+from strategies import covered_ratio_call
 import matplotlib.pyplot as plt
 
 #Strategy strings.
@@ -27,12 +28,14 @@ STRATEGY_BUY_CONSERVATIVELY_WITH_THRESHOLD = "buy_conservatively_and_hold_with_t
 STRATEGY_BUY_CONSERVATIVELY_AND_HOLD_WITH_SHRINKING_THRESHOLD = "buy_conservatively_and_hold_with_shrinking_threshold"
 STRATEGY_SMA = "sma"
 STRATEGY_SMA_WITH_THRESHOLD = "sma_with_threshold"
+STRATEGY_COVERED_RATIO_CALL = "covered_ratio_call"
 
 #String key of simulation results
 KEY_DATE = "DATE"
 KEY_TRADE_HISTORY  = "TRADE_HISTORY"
 KEY_TRADE_TYPE = "TRADE_TYPE"
 KEY_TRADE_SHARE_AMOUNT = "TRADE_SHARE_AMOUNT"
+KEY_TRADE_PRICE = "TRADE_PRICE"
 KEY_TRADE_VALUE = "TRADE_VALUE"
 KEY_TRADE_TIME = "TRADE_TIME"
 KEY_BEGIN_VALUE = "BEGIN_VALUE"
@@ -60,6 +63,8 @@ def initialize(strategy, init_cash):
         sma_with_threshold.initialize(init_cash)
     elif strategy == STRATEGY_BUY_AND_HOLD_WITH_REENTRANT_THRESHOLD:
         buy_and_hold_with_reentrant_threshold.initialize(init_cash)
+    elif strategy == STRATEGY_COVERED_RATIO_CALL:
+        covered_ratio_call.initialize(init_cash)
     else:
         raise Exception("Unknown strategy " + strategy)
 
@@ -81,6 +86,8 @@ def on_stock_price_change(strategy, price):
         return sma_with_threshold.on_stock_price_change(price)
     elif strategy == STRATEGY_BUY_AND_HOLD_WITH_REENTRANT_THRESHOLD:
         return buy_and_hold_with_reentrant_threshold.on_stock_price_change(price)
+    elif strategy == STRATEGY_COVERED_RATIO_CALL:
+        return covered_ratio_call.on_stock_price_change(price)
     else:
         raise Exception("Unknown strategy " + strategy)
 
@@ -99,24 +106,29 @@ def simulate(price_data, begin_time, simulation_length, init_cash, strategy):
         trade_history = []
         for time in range(0, len(price_data[date])):
             price = price_data[date][time]
-            dec, amount = on_stock_price_change(strategy, price)
-            if dec == decision.BUY:
-                shares = shares + amount
-                cash = cash - amount * price
-                if cash < 0:
-                    raise Exception('Negative cash value!') 
-            elif dec == decision.SELL:
-                shares = shares - amount
-                cash = cash + amount * price
-                if shares < 0:
-                    raise Exception('Negative share amount!')
-            if dec == decision.BUY or dec == decision.SELL:
-                trade = {}
-                trade[KEY_TRADE_TIME] = time 
-                trade[KEY_TRADE_TYPE] = dec
-                trade[KEY_TRADE_SHARE_AMOUNT] = amount
-                trade[KEY_TRADE_VALUE] = amount * price
-                trade_history.append(trade)
+            trades = on_stock_price_change(strategy, price)
+            for trade in trades:
+                dec = trade[0]
+                amount = trade[1]
+                exe_price = trade[2]
+                if dec == decision.BUY:
+                    shares = shares + amount
+                    cash = cash - amount * exe_price
+                    if cash < 0:
+                        raise Exception('Negative cash value!') 
+                elif dec == decision.SELL:
+                    shares = shares - amount
+                    cash = cash + amount * exe_price
+                    if shares < 0:
+                        raise Exception('Negative share amount!')
+                if dec == decision.BUY or dec == decision.SELL:
+                    trade_record = {}
+                    trade_record[KEY_TRADE_TIME] = time 
+                    trade_record[KEY_TRADE_TYPE] = dec
+                    trade_record[KEY_TRADE_SHARE_AMOUNT] = amount
+                    trade_record[KEY_TRADE_PRICE] = exe_price
+                    trade_record[KEY_TRADE_VALUE] = amount * price
+                    trade_history.append(trade_record)
         day_investment[KEY_TRADE_HISTORY] = trade_history
         day_investment[KEY_END_CASH] = cash
         day_investment[KEY_END_SHARE] = shares
@@ -138,9 +150,9 @@ def plot_investment_line_chart(price_data, strategy, sim):
     begin_time = sim[0][KEY_DATE]
     simulation_length = len(sim)
     price_line = map(lambda p: sum(p)/len(p), price_data[begin_time: begin_time + simulation_length])
-    normalized_price_line = map(lambda p: p/max(price_line), price_line)
+    normalized_price_line = map(lambda p: p/price_line[0], price_line)
     value_line = map(lambda inv: (inv[KEY_BEGIN_VALUE] + inv[KEY_END_VALUE])/2, sim)
-    normalized_value_line = map(lambda v: v/max(value_line), value_line)
+    normalized_value_line = map(lambda v: v/value_line[0], value_line)
     share_line = map(lambda inv: inv[KEY_END_SHARE], sim)
     normalized_share_line = map(lambda s: float(s)/max(share_line), share_line)
     time_line = range(begin_time, begin_time + simulation_length)

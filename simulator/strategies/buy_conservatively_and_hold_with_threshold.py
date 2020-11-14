@@ -94,11 +94,11 @@ def on_stock_price_change(price):
     assert_share_integrity()
 
     if share_change == 0:
-        return (decision.HOLD, 0)
+        return [(decision.HOLD, 0, price)]
     elif share_change > 0:
-        return (decision.BUY, share_change)
+        return [(decision.BUY, share_change, price)]
     else:
-        return (decision.SELL, - share_change)
+        return [(decision.SELL, - share_change, price)]
 
    
 def assert_share_integrity():
